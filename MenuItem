@@ -1,0 +1,67 @@
+class MenuItem {
+    constructor(id, text, route = null) {
+        this.id = id;
+        this.text = text;
+        this.route = route;
+        this.children = [];
+    }
+}
+
+/**
+ * Gera a árvore de menu a partir de um array de registros CSV.
+ * @param {Array<string>} csvData - Array de strings CSV, cada uma representando um item do menu.
+ * @returns {MenuItem} - A raiz da árvore de menu.
+ */
+
+function generateTree(csvData) {
+    const map = new Map();
+    let root = null;
+
+    for (const row of csvData) {
+        const [id, text, route, parentId] = row.split(",");
+        const menuItem = new MenuItem(id, text, route || null);
+
+        map.set(id, menuItem);
+
+        if (!parentId) {
+            root = menuItem; // Define a raiz da árvore
+        } else {
+            const parent = map.get(parentId);
+            if (parent) {
+                parent.children.push(menuItem); // Adiciona o item como filho do pai
+            }
+        }
+    }
+
+    return root;
+}
+
+/**
+ * Imprime a árvore de menu de forma hierárquica.
+ * @param {MenuItem} menuItem - A raiz ou um nó da árvore de menu.
+ * @param {number} level - O nível hierárquico atual (inicia com 0).
+ */
+ 
+function printMenu(menuItem, level = 0) {
+    const indent = "  ".repeat(level);
+    const routeInfo = menuItem.route ? ` (Rota: ${menuItem.route})` : "";
+    console.log(`${indent}- ${menuItem.text}${routeInfo}`);
+
+    for (const child of menuItem.children) {
+        printMenu(child, level + 1);
+    }
+}
+
+// Exemplo de uso
+const csvData = [
+    "1,Menu Principal,,",
+    "2,Arquivo,,1",
+    "3,Novo,/novo,2",
+    "4,Abrir,/abrir,2",
+    "5,Editar,,1",
+    "6,Desfazer,/desfazer,5",
+    "7,Refazer,/refazer,5"
+];
+
+const menuTree = generateTree(csvData);
+printMenu(menuTree);
